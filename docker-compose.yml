@@ -1,0 +1,15 @@
+version: '3'
+
+networks:
+  database:
+
+services:
+  mongo:
+    image: mongo:latest
+    restart: unless-stopped
+    expose:
+      - '27017'
+    ports:
+      - '27017:27017'
+    networks:
+      - database
