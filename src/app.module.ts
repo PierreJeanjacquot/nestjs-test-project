@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as Joi from 'joi';
 import { SessionModule } from './session/session.module';
@@ -9,10 +9,18 @@ import { SessionModule } from './session/session.module';
     ConfigModule.forRoot({
       validationSchema: Joi.object({
         SESSION_SECRET: Joi.string().min(8).required(),
+        MONGODB_URL: Joi.string().required(),
         PORT: Joi.number().default(3000),
       }),
     }),
-    MongooseModule.forRoot('mongodb://localhost/nest'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URL'),
+        useNewUrlParser: true,
+      }),
+      inject: [ConfigService],
+    }),
     SessionModule,
   ],
 })
